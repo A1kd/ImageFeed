@@ -54,7 +54,7 @@ final class ProfileViewController: UIViewController {
     }
     
     private func setupUI() {
-        view.backgroundColor = .black
+        view.backgroundColor = UIColor(red: 0x1A/255.0, green: 0x1B/255.0, blue: 0x22/255.0, alpha: 1.0)
         
         view.addSubview(profileImageView)
         view.addSubview(nameLabel)
