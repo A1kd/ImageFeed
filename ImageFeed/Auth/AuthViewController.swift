@@ -17,7 +17,7 @@ final class AuthViewController: UIViewController {
 
     // MARK: - UI
 
-    private let logoImageView: UIImageView = {
+    private lazy var logoImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "Logo")
         imageView.contentMode = .scaleAspectFit
@@ -51,7 +51,7 @@ final class AuthViewController: UIViewController {
         view.addSubview(logoImageView)
         view.addSubview(loginButton)
 
-        loginButton.addTarget(self, action: #selector(didTapLogin), for: .touchUpInside)
+        loginButton.addAction(UIAction { [weak self] _ in self?.didTapLogin() }, for: .touchUpInside)
 
         NSLayoutConstraint.activate([
             logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -68,7 +68,7 @@ final class AuthViewController: UIViewController {
 
     // MARK: - Actions
 
-    @objc private func didTapLogin() {
+    private func didTapLogin() {
         let webViewVC = WebViewViewController()
         webViewVC.delegate = self
         let nav = UINavigationController(rootViewController: webViewVC)
@@ -86,7 +86,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
             guard let self else { return }
             switch result {
             case .success(let token):
-                OAuth2TokenStorage().token = token
+                OAuth2TokenStorage.shared.token = token
                 self.delegate?.authViewController(self, didAuthenticateWithCode: code)
             case .failure(let error):
                 print("AuthViewController: fetchAuthToken failed — \(error.localizedDescription)")

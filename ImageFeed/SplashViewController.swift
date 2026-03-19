@@ -9,11 +9,9 @@ import UIKit
 
 final class SplashViewController: UIViewController {
 
-    private let tokenStorage = OAuth2TokenStorage()
-
     // MARK: - UI
 
-    private let logoImageView: UIImageView = {
+    private lazy var logoImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "Vector")
         imageView.contentMode = .scaleAspectFit
@@ -50,7 +48,7 @@ final class SplashViewController: UIViewController {
     // MARK: - Navigation
 
     private func checkAuthStatus() {
-        if tokenStorage.token != nil {
+        if OAuth2TokenStorage.shared.token != nil {
             switchToFeedController()
         } else {
             showAuthViewController()
@@ -67,8 +65,9 @@ final class SplashViewController: UIViewController {
     private func switchToFeedController() {
         guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = scene.windows.first else { return }
-        let feedVC = ViewController()
-        window.rootViewController = feedVC
+        let storyboard = UIStoryboard(name: "Main", bundle: .main)
+        let tabBarVC = storyboard.instantiateViewController(withIdentifier: "TabBarController")
+        window.rootViewController = tabBarVC
         window.makeKeyAndVisible()
     }
 }
