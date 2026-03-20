@@ -6,11 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		F1A2B3C4D5E6F7A8B9C1D2E5 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F1A2B3C4D5E6F7A8B9C1D2E4 /* Kingfisher */; };
-		F2A3B4C5D6E7F8A9B0C2D3E6 /* SwiftKeychainWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = F2A3B4C5D6E7F8A9B0C2D3E5 /* SwiftKeychainWrapper */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		08DCBFB42F1025D6008D5580 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -34,22 +29,9 @@
 		08DCBFBD2F1025D6008D5580 /* ImageFeedUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ImageFeedUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		08DCBFC52F1025D6008D5580 /* Exceptions for "ImageFeed" folder in "ImageFeed" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 08DCBF9C2F1025D5008D5580 /* ImageFeed */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		08DCBF9F2F1025D5008D5580 /* ImageFeed */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				08DCBFC52F1025D6008D5580 /* Exceptions for "ImageFeed" folder in "ImageFeed" target */,
-			);
 			path = ImageFeed;
 			sourceTree = "<group>";
 		};
@@ -70,8 +52,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F1A2B3C4D5E6F7A8B9C1D2E5 /* Kingfisher in Frameworks */,
-				F2A3B4C5D6E7F8A9B0C2D3E6 /* SwiftKeychainWrapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,8 +112,6 @@
 			);
 			name = ImageFeed;
 			packageProductDependencies = (
-				F1A2B3C4D5E6F7A8B9C1D2E4 /* Kingfisher */,
-				F2A3B4C5D6E7F8A9B0C2D3E5 /* SwiftKeychainWrapper */,
 			);
 			productName = ImageFeed;
 			productReference = 08DCBF9D2F1025D5008D5580 /* ImageFeed.app */;
@@ -217,10 +195,6 @@
 			);
 			mainGroup = 08DCBF942F1025D5008D5580;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				086274322F6DBEFC00705AAC /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				086274332F6DBF1C00705AAC /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */,
-			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 08DCBF9E2F1025D5008D5580 /* Products */;
 			projectDirPath = "";
@@ -308,6 +282,7 @@
 				INFOPLIST_FILE = ImageFeed/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -341,6 +316,7 @@
 				INFOPLIST_FILE = ImageFeed/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -606,54 +582,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		086274322F6DBEFC00705AAC /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 8.8.0;
-			};
-		};
-		086274332F6DBF1C00705AAC /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/jrendel/SwiftKeychainWrapper.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.0.1;
-			};
-		};
-		F1A2B3C4D5E6F7A8B9C1D2E3 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 7.0.0;
-			};
-		};
-		F2A3B4C5D6E7F8A9B0C2D3E4 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/jrendel/SwiftKeychainWrapper.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.0.1;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		F1A2B3C4D5E6F7A8B9C1D2E4 /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F1A2B3C4D5E6F7A8B9C1D2E3 /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
-		};
-		F2A3B4C5D6E7F8A9B0C2D3E5 /* SwiftKeychainWrapper */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F2A3B4C5D6E7F8A9B0C2D3E4 /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */;
-			productName = SwiftKeychainWrapper;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 08DCBF952F1025D5008D5580 /* Project object */;
 }
