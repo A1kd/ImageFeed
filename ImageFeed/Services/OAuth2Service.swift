@@ -5,39 +5,46 @@ enum OAuth2ServiceError: Error {
     case invalidResponse
     case httpError(Int)
     case noData
+    case requestCancelled
 }
 
 final class OAuth2Service {
     static let shared = OAuth2Service()
     private init() {}
 
-    nonisolated(unsafe) private var currentTask: URLSessionDataTask?
-    nonisolated(unsafe) private var lastCode: String?
+    private var currentTask: URLSessionTask?
+    private var currentCode: String?
+    private var completions: [(Result<String, Error>) -> Void] = []
 
-    nonisolated func fetchAuthToken(
+    func fetchAuthToken(
         code: String,
-        completion: @escaping @Sendable (Result<String, Error>) -> Void
+        completion: @escaping (Result<String, Error>) -> Void
     ) {
         assert(Thread.isMainThread)
 
-        guard lastCode != code else {
-            print("[OAuth2Service]: Duplicate request for the same code — ignored")
+        // Тот же code — подписываемся на уже идущий запрос
+        if currentCode == code {
+            completions.append(completion)
             return
         }
 
-        currentTask?.cancel()
-        lastCode = code
+        // Другой code — завершаем старый запрос с ошибкой отмены
+        if currentTask != nil {
+            let oldCompletions = completions
+            resetState()
+            oldCompletions.forEach { $0(.failure(OAuth2ServiceError.requestCancelled)) }
+        }
 
-        guard var urlComponents = URLComponents(string: "https://unsplash.com/oauth/token") else {
-            print("[OAuth2Service]: InvalidURL")
-            DispatchQueue.main.async { [weak self] in
-                self?.lastCode = nil
-                completion(.failure(OAuth2ServiceError.invalidURL))
-            }
+        currentCode = code
+        completions = [completion]
+
+        guard var components = URLComponents(string: "https://unsplash.com/oauth/token") else {
+            print("[OAuth2Service]: InvalidURL — не удалось создать URLComponents")
+            finish(with: .failure(OAuth2ServiceError.invalidURL), for: code)
             return
         }
 
-        urlComponents.queryItems = [
+        components.queryItems = [
             URLQueryItem(name: "client_id",     value: Constants.accessKey),
             URLQueryItem(name: "client_secret", value: Constants.secretKey),
             URLQueryItem(name: "redirect_uri",  value: Constants.redirectURI),
@@ -45,12 +52,9 @@ final class OAuth2Service {
             URLQueryItem(name: "grant_type",    value: "authorization_code")
         ]
 
-        guard let url = urlComponents.url else {
-            print("[OAuth2Service]: InvalidURL — failed to build from components")
-            DispatchQueue.main.async { [weak self] in
-                self?.lastCode = nil
-                completion(.failure(OAuth2ServiceError.invalidURL))
-            }
+        guard let url = components.url else {
+            print("[OAuth2Service]: InvalidURL — не удалось собрать URL из компонентов")
+            finish(with: .failure(OAuth2ServiceError.invalidURL), for: code)
             return
         }
 
@@ -59,43 +63,66 @@ final class OAuth2Service {
 
         let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                self?.lastCode = nil
-                self?.currentTask = nil
+                guard let self else { return }
+                // Игнорируем ответ если запрос уже не актуален
+                guard self.currentCode == code else { return }
+
+                if let error = error as NSError?, error.code == NSURLErrorCancelled {
+                    self.finish(with: .failure(OAuth2ServiceError.requestCancelled), for: code)
+                    return
+                }
 
                 if let error {
                     print("[OAuth2Service]: NetworkError - \(error.localizedDescription)")
-                    completion(.failure(error))
+                    self.finish(with: .failure(error), for: code)
                     return
                 }
 
                 guard let httpResponse = response as? HTTPURLResponse else {
                     print("[OAuth2Service]: InvalidResponse")
-                    completion(.failure(OAuth2ServiceError.invalidResponse))
+                    self.finish(with: .failure(OAuth2ServiceError.invalidResponse), for: code)
                     return
                 }
 
                 guard (200...299).contains(httpResponse.statusCode) else {
-                    print("[OAuth2Service]: HTTPError - код ошибки \(httpResponse.statusCode)")
-                    completion(.failure(OAuth2ServiceError.httpError(httpResponse.statusCode)))
+                    print("[OAuth2Service]: HTTPError - \(httpResponse.statusCode)")
+                    self.finish(with: .failure(OAuth2ServiceError.httpError(httpResponse.statusCode)), for: code)
                     return
                 }
 
                 guard let data else {
                     print("[OAuth2Service]: NoData")
-                    completion(.failure(OAuth2ServiceError.noData))
+                    self.finish(with: .failure(OAuth2ServiceError.noData), for: code)
                     return
                 }
 
                 do {
                     let body = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
-                    completion(.success(body.accessToken))
+                    self.finish(with: .success(body.accessToken), for: code)
                 } catch {
                     print("[OAuth2Service]: DecodingError - \(error.localizedDescription), data: \(String(data: data, encoding: .utf8) ?? "nil")")
-                    completion(.failure(error))
+                    self.finish(with: .failure(error), for: code)
                 }
             }
         }
+
         currentTask = task
         task.resume()
+    }
+
+    // MARK: - Private
+
+    private func finish(with result: Result<String, Error>, for code: String) {
+        guard currentCode == code else { return }
+        let callbacks = completions
+        resetState()
+        callbacks.forEach { $0(result) }
+    }
+
+    private func resetState() {
+        currentTask?.cancel()
+        currentTask = nil
+        currentCode = nil
+        completions.removeAll()
     }
 }

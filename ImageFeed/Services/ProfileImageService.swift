@@ -1,12 +1,5 @@
 import Foundation
 
-enum ProfileImageServiceError: Error {
-    case invalidURL
-    case invalidResponse
-    case httpError(Int)
-    case noData
-}
-
 final class ProfileImageService {
     static let shared = ProfileImageService()
     private init() {}
@@ -26,58 +19,34 @@ final class ProfileImageService {
         currentTask?.cancel()
 
         guard let url = URL(string: Constants.defaultBaseURLString + "/users/\(username)") else {
-            print("[ProfileImageService]: InvalidURL - username: \(username)")
-            DispatchQueue.main.async { completion(.failure(ProfileImageServiceError.invalidURL)) }
+            print("[ProfileImageService]: InvalidURL – username: \(username)")
+            completion(.failure(URLSessionError.invalidResponse))
             return
         }
 
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
-        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            if let error {
-                print("[ProfileImageService]: NetworkError - \(error.localizedDescription)")
-                DispatchQueue.main.async { completion(.failure(error)) }
-                return
-            }
+        let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
+            guard let self else { return }
+            self.currentTask = nil
 
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("[ProfileImageService]: InvalidResponse")
-                DispatchQueue.main.async { completion(.failure(ProfileImageServiceError.invalidResponse)) }
-                return
-            }
-
-            guard (200...299).contains(httpResponse.statusCode) else {
-                print("[ProfileImageService]: HTTPError - код ошибки \(httpResponse.statusCode)")
-                DispatchQueue.main.async {
-                    completion(.failure(ProfileImageServiceError.httpError(httpResponse.statusCode)))
-                }
-                return
-            }
-
-            guard let data else {
-                print("[ProfileImageService]: NoData")
-                DispatchQueue.main.async { completion(.failure(ProfileImageServiceError.noData)) }
-                return
-            }
-
-            do {
-                let result = try JSONDecoder().decode(UserResult.self, from: data)
-                let avatarURLString = result.profileImage.small
-                DispatchQueue.main.async {
-                    self?.avatarURL = avatarURLString
-                    completion(.success(avatarURLString))
-                    NotificationCenter.default.post(
-                        name: ProfileImageService.didChangeNotification,
-                        object: self,
-                        userInfo: ["URL": avatarURLString]
-                    )
-                }
-            } catch {
-                print("[ProfileImageService]: DecodingError - \(error.localizedDescription), data: \(String(data: data, encoding: .utf8) ?? "nil")")
-                DispatchQueue.main.async { completion(.failure(error)) }
+            switch result {
+            case .success(let userResult):
+                let avatarURLString = userResult.profileImage.small
+                self.avatarURL = avatarURLString
+                completion(.success(avatarURLString))
+                NotificationCenter.default.post(
+                    name: ProfileImageService.didChangeNotification,
+                    object: self,
+                    userInfo: ["URL": avatarURLString]
+                )
+            case .failure(let error):
+                print("[ProfileImageService]: \(type(of: error)) – \(error.localizedDescription)")
+                completion(.failure(error))
             }
         }
+
         currentTask = task
         task.resume()
     }

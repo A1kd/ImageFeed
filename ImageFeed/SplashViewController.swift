@@ -12,6 +12,8 @@ final class SplashViewController: UIViewController {
         return imageView
     }()
 
+    private var isProfileLoading = false
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -56,6 +58,8 @@ final class SplashViewController: UIViewController {
     }
 
     private func fetchProfile(token: String) {
+        guard !isProfileLoading else { return }
+        isProfileLoading = true
         ProfileService.shared.fetchProfile(token) { [weak self] result in
             guard let self else { return }
             switch result {
@@ -89,9 +93,6 @@ final class SplashViewController: UIViewController {
 
 extension SplashViewController: AuthViewControllerDelegate {
     func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
-        dismiss(animated: true) { [weak self] in
-            guard let token = OAuth2TokenStorage.shared.token else { return }
-            self?.fetchProfile(token: token)
-        }
+        dismiss(animated: true)
     }
 }

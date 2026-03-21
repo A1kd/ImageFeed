@@ -127,12 +127,6 @@ extension WebViewViewController: WKNavigationDelegate {
         }
     }
 
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        if let code = code(from: webView.url) {
-            handleCode(code)
-        }
-    }
-
     private func handleCode(_ code: String) {
         guard !didHandleCode else { return }
         didHandleCode = true
