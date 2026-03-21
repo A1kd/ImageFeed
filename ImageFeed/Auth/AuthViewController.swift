@@ -1,10 +1,3 @@
-//
-//  AuthViewController.swift
-//  ImageFeed
-//
-//  Created by I on 08.01.2026.
-//
-
 import UIKit
 
 protocol AuthViewControllerDelegate: AnyObject {
@@ -82,14 +75,18 @@ final class AuthViewController: UIViewController {
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         dismiss(animated: true)
+        UIBlockingProgressHUD.show()
+
         OAuth2Service.shared.fetchAuthToken(code: code) { [weak self] result in
             guard let self else { return }
+            UIBlockingProgressHUD.dismiss()
+
             switch result {
             case .success(let token):
                 OAuth2TokenStorage.shared.token = token
                 self.delegate?.authViewController(self, didAuthenticateWithCode: code)
             case .failure(let error):
-                print("AuthViewController: fetchAuthToken failed — \(error.localizedDescription)")
+                print("[AuthViewController]: fetchAuthToken failure - \(error.localizedDescription)")
                 self.showAuthErrorAlert()
             }
         }
