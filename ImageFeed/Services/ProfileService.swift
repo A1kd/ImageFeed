@@ -8,6 +8,12 @@ final class ProfileService {
 
     nonisolated(unsafe) private var currentTask: URLSessionDataTask?
 
+    func reset() {
+        currentTask?.cancel()
+        currentTask = nil
+        profile = nil
+    }
+
     nonisolated func fetchProfile(_ token: String, completion: @escaping @Sendable (Result<Profile, Error>) -> Void) {
         assert(Thread.isMainThread)
         currentTask?.cancel()

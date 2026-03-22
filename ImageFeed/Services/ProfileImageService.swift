@@ -10,6 +10,12 @@ final class ProfileImageService {
 
     nonisolated(unsafe) private var currentTask: URLSessionDataTask?
 
+    func reset() {
+        currentTask?.cancel()
+        currentTask = nil
+        avatarURL = nil
+    }
+
     nonisolated func fetchProfileImageURL(
         username: String,
         token: String,
