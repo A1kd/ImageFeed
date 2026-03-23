@@ -4,7 +4,7 @@ import Kingfisher
 final class ImagesListViewController: UIViewController {
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
 
-    @IBOutlet private var tableView: UITableView!
+    @IBOutlet private weak var tableView: UITableView!
 
     private var photos: [Photo] = []
     private var imagesListObserver: NSObjectProtocol?
