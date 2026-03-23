@@ -27,7 +27,10 @@ final class ImagesListService {
             return
         }
 
-        var urlComponents = URLComponents(string: Constants.defaultBaseURLString + "/photos")!
+        guard var urlComponents = URLComponents(string: Constants.defaultBaseURLString + "/photos") else {
+            print("[fetchPhotosNextPage ImagesListService]: InvalidBaseURL page=\(nextPage)")
+            return
+        }
         urlComponents.queryItems = [
             URLQueryItem(name: "page", value: "\(nextPage)"),
             URLQueryItem(name: "per_page", value: "10")

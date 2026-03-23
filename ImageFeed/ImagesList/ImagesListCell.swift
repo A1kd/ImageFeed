@@ -5,22 +5,21 @@ protocol ImagesListCellDelegate: AnyObject {
     func imageListCellDidTapLike(_ cell: ImagesListCell)
 }
 
-enum FeedCellImageState {
-    case loading
-    case error
-    case finished(UIImage)
-}
-
 final class ImagesListCell: UITableViewCell {
     static let reuseIdentifier = "ImagesListCell"
 
-    @IBOutlet var cellImage: UIImageView!
-    @IBOutlet var likeButton: UIButton!
-    @IBOutlet var dateLabel: UILabel!
+    // MARK: - IBOutlets
+
+    @IBOutlet weak var cellImage: UIImageView!
+    @IBOutlet weak var likeButton: UIButton!
+    @IBOutlet weak var dateLabel: UILabel!
+
+    // MARK: - Properties
 
     weak var delegate: ImagesListCellDelegate?
-
     private var gradientLayer: CAGradientLayer?
+
+    // MARK: - UI
 
     private lazy var stubIconView: UIImageView = {
         let config = UIImage.SymbolConfiguration(pointSize: 56, weight: .regular)
@@ -55,7 +54,7 @@ final class ImagesListCell: UITableViewCell {
         gradientLayer?.frame = cellImage.bounds
     }
 
-    // MARK: - Public
+    // MARK: - Public Methods
 
     func setIsLiked(_ isLiked: Bool) {
         let imageName = isLiked ? "like_button_on" : "like_button_off"
@@ -88,7 +87,7 @@ final class ImagesListCell: UITableViewCell {
         delegate?.imageListCellDidTapLike(self)
     }
 
-    // MARK: - Private
+    // MARK: - Private Methods
 
     private func setupStubIcon() {
         cellImage.addSubview(stubIconView)

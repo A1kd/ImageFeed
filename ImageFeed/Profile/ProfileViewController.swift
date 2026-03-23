@@ -71,6 +71,7 @@ final class ProfileViewController: UIViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+
         avatarGradientLayer?.frame = profileImageView.bounds
         for shimmerView in labelShimmerViews {
             guard let gradient = shimmerView.layer.sublayers?.first as? CAGradientLayer else { continue }
@@ -180,6 +181,7 @@ final class ProfileViewController: UIViewController {
 
     private func showLabelShimmers() {
         guard labelShimmerViews.isEmpty else { return }
+
         let anchors: [(topAnchor: NSLayoutYAxisAnchor, leadingAnchor: NSLayoutXAxisAnchor)] = [
             (nameLabel.topAnchor, nameLabel.leadingAnchor),
             (loginNameLabel.topAnchor, loginNameLabel.leadingAnchor),
