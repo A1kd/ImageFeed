@@ -3,6 +3,8 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
 
+    var presenter: ProfilePresenterProtocol?
+
     // MARK: - UI Elements
 
     private let profileImageView: UIImageView = {
@@ -20,6 +22,7 @@ final class ProfileViewController: UIViewController {
         label.font = UIFont.systemFont(ofSize: 23, weight: .bold)
         label.textColor = .white
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.accessibilityIdentifier = "nameLabel"
         return label
     }()
 
@@ -29,6 +32,7 @@ final class ProfileViewController: UIViewController {
         label.font = UIFont.systemFont(ofSize: 13)
         label.textColor = .gray
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.accessibilityIdentifier = "loginLabel"
         return label
     }()
 
@@ -55,7 +59,6 @@ final class ProfileViewController: UIViewController {
 
     private var avatarGradientLayer: CAGradientLayer?
     private var labelShimmerViews: [UIView] = []
-    // Fixed shimmer bar sizes from design [width, height]
     private let shimmerSizes: [(CGFloat, CGFloat)] = [(150, 28), (104, 18), (80, 18)]
 
     // MARK: - Lifecycle
@@ -65,8 +68,12 @@ final class ProfileViewController: UIViewController {
         setupUI()
         setupConstraints()
         showAllShimmers()
-        updateProfileDetails()
-        observeAvatarChange()
+
+        if presenter == nil {
+            presenter = ProfilePresenter()
+        }
+        presenter?.view = self
+        presenter?.viewDidLoad()
     }
 
     override func viewDidLayoutSubviews() {
@@ -115,43 +122,6 @@ final class ProfileViewController: UIViewController {
             logoutButton.widthAnchor.constraint(equalToConstant: 44),
             logoutButton.heightAnchor.constraint(equalToConstant: 44)
         ])
-    }
-
-    // MARK: - Profile Data
-
-    private func updateProfileDetails() {
-        guard let profile = ProfileService.shared.profile else { return }
-        nameLabel.text        = profile.name
-        loginNameLabel.text   = profile.loginName
-        descriptionLabel.text = profile.bio ?? ""
-        removeLabelShimmers()
-    }
-
-    private func observeAvatarChange() {
-        NotificationCenter.default.addObserver(
-            forName: ProfileImageService.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.updateAvatar()
-        }
-        updateAvatar()
-    }
-
-    private func updateAvatar() {
-        guard
-            let urlString = ProfileImageService.shared.avatarURL,
-            let url = URL(string: urlString)
-        else {
-            showAvatarGradient()
-            return
-        }
-        profileImageView.kf.setImage(
-            with: url,
-            placeholder: UIImage(named: "Stub")
-        ) { [weak self] _ in
-            self?.removeAvatarGradient()
-        }
     }
 
     // MARK: - All shimmers (called on load)
@@ -239,6 +209,30 @@ final class ProfileViewController: UIViewController {
     // MARK: - Actions
 
     @objc private func didTapLogoutButton() {
+        presenter?.didTapLogout()
+    }
+}
+
+// MARK: - ProfileViewProtocol
+
+extension ProfileViewController: ProfileViewProtocol {
+    func updateProfileDetails(name: String, loginName: String, bio: String) {
+        nameLabel.text        = name
+        loginNameLabel.text   = loginName
+        descriptionLabel.text = bio
+        removeLabelShimmers()
+    }
+
+    func updateAvatar(url: URL) {
+        profileImageView.kf.setImage(
+            with: url,
+            placeholder: UIImage(named: "Stub")
+        ) { [weak self] _ in
+            self?.removeAvatarGradient()
+        }
+    }
+
+    func showLogoutConfirmation() {
         let alert = UIAlertController(
             title: "Пока, пока!",
             message: "Уверены что хотите выйти?",
@@ -246,20 +240,14 @@ final class ProfileViewController: UIViewController {
         )
         alert.addAction(UIAlertAction(title: "Нет", style: .cancel))
         alert.addAction(UIAlertAction(title: "Да", style: .default) { [weak self] _ in
-            self?.logout()
+            self?.presenter?.logout()
         })
         present(alert, animated: true)
     }
 
-    private func logout() {
-        OAuth2TokenStorage.shared.token = nil
-        HTTPCookieStorage.shared.removeCookies(since: .distantPast)
+    func resetToSplash() {
         ImageCache.default.clearMemoryCache()
         ImageCache.default.clearDiskCache()
-
-        ImagesListService.shared.reset()
-        ProfileService.shared.reset()
-        ProfileImageService.shared.reset()
 
         guard
             let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,

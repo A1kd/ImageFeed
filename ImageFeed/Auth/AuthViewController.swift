@@ -26,6 +26,7 @@ final class AuthViewController: UIViewController {
         button.layer.cornerRadius = 16
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 17)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.accessibilityIdentifier = "Authenticate"
         return button
     }()
 
@@ -44,7 +45,7 @@ final class AuthViewController: UIViewController {
         view.addSubview(logoImageView)
         view.addSubview(loginButton)
 
-        loginButton.addAction(UIAction { [weak self] _ in self?.didTapLogin() }, for: .touchUpInside)
+        loginButton.addTarget(self, action: #selector(didTapLogin), for: .touchUpInside)
 
         NSLayoutConstraint.activate([
             logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -61,8 +62,12 @@ final class AuthViewController: UIViewController {
 
     // MARK: - Actions
 
-    private func didTapLogin() {
+    @objc private func didTapLogin() {
         let webViewVC = WebViewViewController()
+        let authHelper = AuthHelper()
+        let presenter = WebViewPresenter(authHelper: authHelper)
+        webViewVC.presenter = presenter
+        presenter.view = webViewVC
         webViewVC.delegate = self
         let nav = UINavigationController(rootViewController: webViewVC)
         nav.modalPresentationStyle = .fullScreen
