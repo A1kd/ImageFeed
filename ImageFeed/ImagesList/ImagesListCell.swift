@@ -37,6 +37,7 @@ final class ImagesListCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         likeButton.addTarget(self, action: #selector(didTapLikeButton), for: .touchUpInside)
+        likeButton.accessibilityIdentifier = "likeButton"
         setupStubIcon()
     }
 
